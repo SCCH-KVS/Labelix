@@ -90,8 +90,8 @@ export class ProjectConclusionDialogComponent implements OnInit, OnDestroy {
       name: this.activeProject.name,
       timestamp: this.activeProject.timestamp
     };
-
-    this.projectFacade.putProject(transferObject);
+    this.annotationFacade.changesPresent = false;
+    this.projectFacade.putProject(transferObject).subscribe();
     this.router.navigate(['projects']);
     this.dialogRef.close();
   }

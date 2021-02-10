@@ -1,8 +1,13 @@
 import {Injectable} from '@angular/core';
 import {
-  AnnotationState, getActiveLabel, getActivePolygonAnnotation, getActiveProject,
+  AnnotationState,
+  getActiveLabel,
+  getActivePolygonAnnotation,
+  getActiveProject,
   getCurrentAnnotatingImage,
-  getCurrentAnnotationMode, getCurrentImageAnnotations, getNextAnnotationId
+  getCurrentAnnotationMode,
+  getCurrentImageAnnotations,
+  getNextAnnotationId
 } from '../core-layer/states/state-definitions/annotationState';
 import {select, Store} from '@ngrx/store';
 import {Observable} from 'rxjs';
@@ -13,16 +18,23 @@ import {
   AddWholeImageAnnotation,
   ChangeActiveLabel,
   ChangeCategoryOfCurrentImageAnnotation,
-  ChangeCurrentAnnotationMode, ChangeVisibilityOfImageAnnotation,
+  ChangeCurrentAnnotationMode,
+  ChangeVisibilityOfImageAnnotation,
   DeleteImageAnnotation,
-  IncrementAnnotationCount, ReplaceActiveProject, ResetActiveImageAnnotation, ResetAnnotationState,
+  IncrementAnnotationCount,
+  ReplaceActiveProject,
+  ResetActiveImageAnnotation,
+  ResetAnnotationState,
   SetActiveAnnotation,
-  SetCurrentAnnotationPicture, UpdateCategoryOInAnnotations, UpdateImageAnnotation
+  SetCurrentAnnotationPicture,
+  UpdateCategoryOInAnnotations,
+  UpdateImageAnnotation
 } from '../core-layer/states/actions/image-annotation.actions';
 import {AnnotationMode} from '../core-layer/utility/annotaionModeEnum';
 import {IImageAnnotation} from '../core-layer/contracts/IImageAnnotation';
 import {ICategory} from '../core-layer/contracts/ICategory';
 import {IProject} from '../core-layer/contracts/IProject';
+import {AiModelConfigServiceService} from '../core-layer/services/aiModelConfig-service.service ';
 
 @Injectable()
 export class AnnotationFacade {
@@ -35,7 +47,9 @@ export class AnnotationFacade {
   activePolygonAnnotation: Observable<IImageAnnotation>;
   activeProject: Observable<IProject>;
 
-  constructor(private store: Store<AnnotationState>) {
+  changesPresent: boolean;
+
+  constructor(private store: Store<AnnotationState>, private aiModelConfigService: AiModelConfigServiceService) {
     this.currentAnnotationImage = this.store.pipe(select(getCurrentAnnotatingImage));
     this.currentAnnotationMode = this.store.pipe(select(getCurrentAnnotationMode));
     this.currentImageAnnotations = this.store.pipe(select(getCurrentImageAnnotations));

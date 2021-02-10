@@ -70,15 +70,17 @@ export function drawBoundingBox(
   activeRawImage: IRawImage,
   name: string) {
 
-  const actualX = boundingBox.xCoordinate / activeRawImage.width * canvasEl.width;
-  const actualY = boundingBox.yCoordinate / activeRawImage.height * canvasEl.height;
-  const actualWidth = boundingBox.width / activeRawImage.width * canvasEl.width;
-  const actualHeight = boundingBox.height / activeRawImage.height * canvasEl.height;
-  ctx.beginPath();
-  ctx.fillRect(actualX, actualY, actualWidth, actualHeight);
-  ctx.rect(actualX, actualY, actualWidth, actualHeight);
-  ctx.stroke();
-  drawAnnotationHeader(ctx, actualX, actualY, ctx.strokeStyle.toString(), name);
+  if (boundingBox !== undefined) {
+    const actualX = boundingBox.xCoordinate / activeRawImage.width * canvasEl.width;
+    const actualY = boundingBox.yCoordinate / activeRawImage.height * canvasEl.height;
+    const actualWidth = boundingBox.width / activeRawImage.width * canvasEl.width;
+    const actualHeight = boundingBox.height / activeRawImage.height * canvasEl.height;
+    ctx.beginPath();
+    ctx.fillRect(actualX, actualY, actualWidth, actualHeight);
+    ctx.rect(actualX, actualY, actualWidth, actualHeight);
+    ctx.stroke();
+    drawAnnotationHeader(ctx, actualX, actualY, ctx.strokeStyle.toString(), name);
+  }
 }
 
 export function drawExistingAnnotationsBoundingBoxes(
@@ -96,7 +98,7 @@ export function drawExistingAnnotationsBoundingBoxes(
       && item.image.id === activeRawImage.id) {
       ctx.strokeStyle = item.categoryLabel.colorCode;
       ctx.fillStyle = hexToRGB(item.categoryLabel.colorCode, opacity);
-      drawBoundingBox(item.boundingBox, canvasEl, ctx, activeRawImage, item.id + ': ' + item.categoryLabel.name);
+      drawBoundingBox(item.boundingBox, canvasEl, ctx, activeRawImage, (elements.indexOf(item) + 1) + ': ' + item.categoryLabel.name);
     }
   }
 }

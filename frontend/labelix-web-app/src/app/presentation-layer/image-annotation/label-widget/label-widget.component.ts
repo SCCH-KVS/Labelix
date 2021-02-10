@@ -6,6 +6,7 @@ import {AnnotationMode} from '../../../core-layer/utility/annotaionModeEnum';
 import {LabelSettingsDialogComponent} from '../label-settings-dialog/label-settings-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
+import {AddLabelDialogComponent} from '../add-label-dialog/add-label-dialog.component';
 
 @Component({
   selector: 'app-label-widget',
@@ -22,8 +23,6 @@ export class LabelWidgetComponent implements OnInit, OnDestroy {
 
   currentlyAdding = false;
 
-  newLabelName: string;
-  newSupercategory: string;
   numExistingLabels: number;
 
   nextLabelId: number;
@@ -48,6 +47,10 @@ export class LabelWidgetComponent implements OnInit, OnDestroy {
 
   onAddLabel() {
     this.currentlyAdding = true;
+  }
+
+  onAddLabelClick() {
+    this.dialog.open(AddLabelDialogComponent);
   }
 
   onSettings() {

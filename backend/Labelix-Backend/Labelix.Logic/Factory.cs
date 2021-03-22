@@ -1,4 +1,7 @@
-﻿using Labelix.Logic.DataContext.Db;
+﻿using Labelix.Contracts.Client.Buisiness;
+using Labelix.Logic.Controllers.Buisiness;
+using Labelix.Logic.Controllers.Business;
+using Labelix.Logic.DataContext.Db;
 
 namespace Labelix.Logic
 {
@@ -62,5 +65,29 @@ namespace Labelix.Logic
 
             return result;
         }
+
+        #region BuisinessController
+
+        public static IUserManagementController CreateUserManagementController()
+        {
+            return new UserManagementController();
+        }
+
+        public static IProjectController CreateProjectController()
+        {
+            return new ProjectController();
+        }
+
+        public static IImageController CreateImageController()
+        {
+            return new ImageController();
+        }
+
+        public static IAIModelConfigController CreateAiModelConfigController()
+        {
+            return new AIConfigController();
+        }
+
+        #endregion
     }
 }

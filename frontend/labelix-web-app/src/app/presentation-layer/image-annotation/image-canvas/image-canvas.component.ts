@@ -3,7 +3,7 @@ import {RawImageFacade} from '../../../abstraction-layer/RawImageFacade';
 import {IRawImage} from '../../../core-layer/contracts/IRawImage';
 import {AnnotationFacade} from '../../../abstraction-layer/AnnotationFacade';
 import {fromEvent, Observable, Subscription} from 'rxjs';
-import {AnnotationMode} from '../../../core-layer/utility/annotaionModeEnum';
+import {AnnotationMode} from '../../../core-layer/utility/annotation-mode-enum';
 import {ICategory} from '../../../core-layer/contracts/ICategory';
 import {IImageAnnotation} from '../../../core-layer/contracts/IImageAnnotation';
 import {
@@ -121,6 +121,13 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
     this.subscription.add(this.annotationFacade.numberOfCurrentImageAnnotations.subscribe(value => this.nextAnnotationId = value));
   }
 
+  ngAfterViewInit() {
+    const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
+    this.ctx = canvasEl.getContext('2d');
+    this.ctx.lineWidth = 2;
+    this.captureEvents(canvasEl);
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.categoryLabelFacade.resetCategoryLabelState();
@@ -150,6 +157,7 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
   getDimensionsOfUploadedImage() {
     const reader = new FileReader();
     const image = new Image();
+
     reader.addEventListener('load', (event: any) => {
       image.src = event.target.result;
       image.onload = () => {
@@ -165,6 +173,7 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
         this.annotationFacade.changeCurrentAnnotationImage(newRawImage);
       };
     });
+
     reader.readAsDataURL(this.activeRawImage.file);
   }
 
@@ -194,6 +203,7 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
     return value / rawImageValue * canvasValue;
   }
 
+  // redraws all annotations
   private redrawCanvas() {
 
     if (this.canvas !== undefined) {
@@ -209,19 +219,12 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
 
       if (this.activeAnnotation !== undefined) {
         drawPointsOfPolygonAnnotation(canvasEl, this.activeAnnotation, this.ctx, this.currentlyDrawing,
-          (this.currentImageAnnotations.indexOf(this.activeAnnotation) + 1  !== 0
+          (this.currentImageAnnotations.indexOf(this.activeAnnotation) + 1 !== 0
             ? (this.currentImageAnnotations.indexOf(this.activeAnnotation) + 1)
             : '') + ': ' + this.activeAnnotation.categoryLabel.name);
         fillShape(canvasEl, this.activeAnnotation, this.ctx, this.opacity);
       }
     }
-  }
-
-  ngAfterViewInit() {
-    const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
-    this.ctx = canvasEl.getContext('2d');
-    this.ctx.lineWidth = 2;
-    this.captureEvents(canvasEl);
   }
 
   captureEvents(canvasEl: HTMLCanvasElement) {
@@ -230,12 +233,14 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
     this.annotationFacade.changesPresent = true;
 
     fromEvent(canvasEl, 'mousedown').subscribe((value: MouseEvent) => {
+
       if (this.activeLabel !== undefined && this.activeRawImage !== undefined) {
         this.currentlyDrawing = true;
 
         setCanvasDimensions(canvasEl);
         drawExistingAnnotationsBoundingBoxes(canvasEl, this.currentImageAnnotations, this.ctx, this.activeRawImage, this.opacity);
-        drawExistingPolygonAnnotations(canvasEl, this.currentImageAnnotations, this.activeRawImage, this.currentlyDrawing, this.ctx);
+        drawExistingPolygonAnnotations(canvasEl, this.currentImageAnnotations,
+          this.activeRawImage, this.currentlyDrawing, this.ctx);
 
         if (this.currentAnnotationMode === AnnotationMode.BOUNDING_BOXES) {
           onMouseDownBoundingBoxen(lastPos, value, canvasEl);
@@ -272,10 +277,15 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
 
             if (item.annotationMode === AnnotationMode.BOUNDING_BOXES && item.boundingBox !== undefined) {
 
-              const leftBoxBoundary = this.getActualScale(item.boundingBox.xCoordinate, this.activeRawImage.width, canvasEl.width);
-              const topBoxBoundary = this.getActualScale(item.boundingBox.yCoordinate, this.activeRawImage.height, canvasEl.height);
-              const actualBoundingBoxWidth = this.getActualScale(item.boundingBox.width, this.activeRawImage.width, canvasEl.width);
-              const actualBoundingBoxHeight = this.getActualScale(item.boundingBox.height, this.activeRawImage.height, canvasEl.height);
+              const leftBoxBoundary =
+                this.getActualScale(item.boundingBox.xCoordinate, this.activeRawImage.width, canvasEl.width);
+              const topBoxBoundary =
+                this.getActualScale(item.boundingBox.yCoordinate, this.activeRawImage.height, canvasEl.height);
+              const actualBoundingBoxWidth =
+                this.getActualScale(item.boundingBox.width, this.activeRawImage.width, canvasEl.width);
+              const actualBoundingBoxHeight =
+                this.getActualScale(item.boundingBox.height, this.activeRawImage.height, canvasEl.height);
+
               // check if the bounding box can be dragged around based on the mouse position
               if (leftBoxBoundary + (actualBoundingBoxWidth * spaceRatio) <= xMousePos
                 && leftBoxBoundary + (actualBoundingBoxWidth * (1 - spaceRatio)) >= xMousePos
@@ -341,7 +351,8 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
 
         setCanvasDimensions(canvasEl);
         drawExistingAnnotationsBoundingBoxes(canvasEl, this.currentImageAnnotations, this.ctx, this.activeRawImage, this.opacity);
-        drawExistingPolygonAnnotations(canvasEl, this.currentImageAnnotations, this.activeRawImage, this.currentlyDrawing, this.ctx);
+        drawExistingPolygonAnnotations(canvasEl, this.currentImageAnnotations,
+          this.activeRawImage, this.currentlyDrawing, this.ctx);
 
         if (this.currentAnnotationMode === AnnotationMode.BOUNDING_BOXES) {
           onMouseMoveBoundingBoxen(lastPos, value, canvasEl, this.ctx, this.activeLabel, this.opacity);
@@ -356,6 +367,7 @@ export class ImageCanvasComponent implements ComponentCanDeactivate, OnInit, Aft
           this.editingOptions, this.mousePositions,
           this.annotationFacade, this.activeAnnotation,
           this.activeRawImage);
+
         this.redrawCanvas();
       }
     });
